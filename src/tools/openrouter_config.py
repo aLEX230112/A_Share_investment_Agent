@@ -1,7 +1,8 @@
 import os
 import time
 import logging
-from google import genai
+#from google.generativeai import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 from dataclasses import dataclass
 import backoff
@@ -83,17 +84,19 @@ else:
 
 # 验证环境变量
 api_key = os.getenv("GEMINI_API_KEY")
-model = os.getenv("GEMINI_MODEL")
+#model = os.getenv("GEMINI_MODEL")
+model_name = os.getenv("GEMINI_MODEL")
 
 if not api_key:
     logger.error(f"{ERROR_ICON} 未找到 GEMINI_API_KEY 环境变量")
     raise ValueError("GEMINI_API_KEY not found in environment variables")
-if not model:
-    model = "gemini-1.5-flash"
-    logger.info(f"{WAIT_ICON} 使用默认模型: {model}")
-
+if not model_name:
+    model_name = "gemini-1.5-flash"
+    logger.info(f"{WAIT_ICON} 使用默认模型: {model_name}")
+model = genai.GenerativeModel(model_name)
 # 初始化 Gemini 客户端
-client = genai.Client(api_key=api_key)
+#client = genai.Client(api_key=api_key)
+genai.configure(api_key=api_key)
 logger.info(f"{SUCCESS_ICON} Gemini 客户端初始化成功")
 
 
@@ -112,10 +115,13 @@ def generate_content_with_retry(model, contents, config=None):
             str(contents)) > 500 else f"请求内容: {contents}")
         logger.info(f"请求配置: {config}")
 
-        response = client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=config
+        #response = client.models.generate_content(
+        #    model=model,
+        #    contents=contents,
+        #    config=config
+        #)
+        response = model.generate_content(
+            contents=contents
         )
 
         logger.info(f"{SUCCESS_ICON} API 调用成功")
@@ -136,9 +142,10 @@ def get_chat_completion(messages, model=None, max_retries=3, initial_retry_delay
     """获取聊天完成结果，包含重试逻辑"""
     try:
         if model is None:
-            model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai.GenerativeModel(model_name)
 
-        logger.info(f"{WAIT_ICON} 使用模型: {model}")
+        logger.info(f"{WAIT_ICON} 使用模型: {model_name}")
         logger.debug(f"消息内容: {messages}")
 
         for attempt in range(max_retries):
@@ -168,7 +175,6 @@ def get_chat_completion(messages, model=None, max_retries=3, initial_retry_delay
                     contents=prompt.strip(),
                     config=config
                 )
-
                 if response is None:
                     logger.warning(
                         f"{ERROR_ICON} 尝试 {attempt + 1}/{max_retries}: API 返回空值")
