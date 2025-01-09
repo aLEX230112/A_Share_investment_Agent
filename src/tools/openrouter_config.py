@@ -3,6 +3,7 @@ import time
 import logging
 #from google.generativeai import genai
 import google.generativeai as genai
+from google.colab import userdata
 from dotenv import load_dotenv
 from dataclasses import dataclass
 import backoff
@@ -88,8 +89,10 @@ api_key = os.getenv("GEMINI_API_KEY")
 model_name = os.getenv("GEMINI_MODEL")
 
 if not api_key:
-    logger.error(f"{ERROR_ICON} 未找到 GEMINI_API_KEY 环境变量")
-    raise ValueError("GEMINI_API_KEY not found in environment variables")
+    logger.warning(f"{ERROR_ICON} 未找到 GEMINI_API_KEY 环境变量")
+    #环境变量不存在的时候，读取存储在colab notebook中的api key
+    api_key = userdata.get('GOOGLE_API_KEY')
+    #raise ValueError("GEMINI_API_KEY not found in environment variables")
 if not model_name:
     model_name = "gemini-1.5-flash"
     logger.info(f"{WAIT_ICON} 使用默认模型: {model_name}")
