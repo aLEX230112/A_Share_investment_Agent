@@ -13,7 +13,6 @@ from langchain_core.messages import HumanMessage
 import akshare as ak
 import pandas as pd
 
-
 ##### Run the Hedge Fund #####
 def run_hedge_fund(ticker: str, start_date: str, end_date: str, portfolio: dict, show_reasoning: bool = False, num_of_news: int = 5):
     final_state = app.invoke(
