@@ -89,9 +89,9 @@ model_name = os.getenv("GEMINI_MODEL")
 
 if not api_key:
     logger.warning(f"{ERROR_ICON} 未找到 GEMINI_API_KEY 环境变量")
-    #环境变量不存在的时候，读取存储在colab notebook中的api key
-    api_key=os.environ['GOOGLE_API_KEY']
-    #raise ValueError("GEMINI_API_KEY not found in environment variables")
+    ##环境变量不存在的时候，读取存储在colab notebook中的api key
+    #api_key=os.environ['GOOGLE_API_KEY']
+    raise ValueError("GEMINI_API_KEY not found in environment variables")
 if not model_name:
     model_name = "gemini-1.5-flash"
     logger.info(f"{WAIT_ICON} 使用默认模型: {model_name}")
